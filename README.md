@@ -11,6 +11,7 @@ This is an employee database that runs in the console. It can add a new departme
 5. [Contributing](#contributing)
 6. [Tests](#tests)
 7. [Questions](#questions)
+8. [Video Guide](#video-guide)
 
 ## Installation
 npm install
@@ -31,3 +32,6 @@ none
 
 - Github Profile: [jtwob](https://github.com/jtwob)
 - Email: jtotah@usfca.edu
+
+## Video Guide
+[link](https://drive.google.com/file/d/1o-JcaPoM_6U6b0wpo7XpwtDid0H-eQ9q/view)
