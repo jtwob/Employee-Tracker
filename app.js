@@ -163,7 +163,7 @@ const managerHelper = function (choiceArr){
         if(err) throw err;
         // console.log(rows);
         for (var i of rows) {
-            console.log(i.first_name);
+            // console.log(i.first_name);
             temp.push(i.first_name + " " + i.last_name);
         }  
         addEmployeeQs(choiceArr, temp);
@@ -281,6 +281,55 @@ const viewEmployees = function () {
     let ret = [];
     let roles = [];
     let deps = [];
+
+    connection.query("SELECT * FROM employees", (err, results) => {
+        if(err) throw err;
+
+        for(let i = 0; i < results.length; i++){
+            ret.push([results[i].id, results[i].first_name, results[i].last_name, results[i].role_id, null, null, results[i].manager_id]);
+        }
+
+        connection.query("SELECT * FROM roles", (err, result1) => {
+            if(err) throw err;
+
+            for(let j = 0; j < result1.length; j++){
+                roles.push([result1[j].id, result1[j].title, result1[j].salary, result1[j].department_id]);
+            }
+            for(let i = 0; i < ret.length; i++){
+                for(let j = 0; j < roles.length; j++){
+                    if(ret[i][3] === roles[j][0]){
+                        ret[i][3] = roles[j][1];
+                        ret[i][4] = roles[j][2];
+                        ret[i][5] = roles[j][3];
+                    }
+                }
+            }
+            connection.query("SELECT * FROM departments", (err, result2) =>  {
+                if(err)throw err;
+
+                for(let i = 0; i < result2.length; i++){
+                    deps.push({"id": result2[i].id, "name": result2[i].name});
+                }
+                for(let i = 0; i < ret.length; i++){
+                    for(let j = 0; j < deps.length; j++){
+                        if(ret[i][5] === deps[j].id){
+                            ret[i][5] = deps[j].name;
+                        }
+                    }
+                }
+                for(let i = 0; i < ret.length; i++){
+                    for(let j = 0; j < ret.length; j++){
+                        if(ret[i][6] === ret[j][0]){
+                            ret[i][6] = ret[j][1] + ret[j][2];
+                        }
+                    }
+                }
+                console.log("\n");
+                console.table(["ID", "first_name", "last_name", "role", "salary", "department", "manager"], ret);
+            })
+        })
+    })
+    menu();
 }
 
 menu();
