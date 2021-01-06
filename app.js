@@ -242,13 +242,37 @@ const viewDepartments = function () {
     let ret = [];
     connection.query("SELECT * FROM departments", (err, result) => {
         if(err) throw err;
-        // console.log();
         for (let i = 0; i < result.length; i++){
-            // console.log(i);
             ret.push([result[i].id, result[i].name]);
         }
         console.log("\n")
         console.table(["id", "name"], ret);
+    });
+    menu();
+}
+
+const viewRoles = function() {
+    let ret = [];
+    let deps = [];
+    connection.query("SELECT roles.id, roles.title, roles.salary, roles.department_id FROM roles", (err, results) => {
+        if(err) throw err;
+        for(let i = 0; i < results.length; i++){
+            ret.push([results[i].id, results[i].title, results[i].salary, results[i].department_id]);
+        }
+        connection.query("SELECT * FROM departments", (err, result) =>  {
+            for(let i = 0; i < result.length; i++){
+                deps.push({"id": result[i].id, "name": result[i].name});
+            }
+            for(let i = 0; i < ret.length; i++){
+                for(let j = 0; j < deps.length; j++){
+                    if(ret[i][3] === deps[j].id){
+                        ret[i][3] = deps[j].name;
+                    }
+                }
+            }
+            console.log("\n")
+            console.table(["ID", "Title", "Salary", "Department"],ret);
+        });
     });
     menu();
 }
