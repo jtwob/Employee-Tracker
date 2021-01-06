@@ -277,4 +277,10 @@ const viewRoles = function() {
     menu();
 }
 
+const viewEmployees = function () {
+    let ret = [];
+    let roles = [];
+    let deps = [];
+}
+
 menu();
