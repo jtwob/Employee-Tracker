@@ -29,7 +29,6 @@ const mainMenu = [
     "View departments", 
     "View roles", 
     "View employees", 
-    "Update employee department",
     "Update employee roles",
     "Update employee manager",
     "Exit"
@@ -63,11 +62,9 @@ const optionSwitch = function (option) {
         break; 
         case "View employees": viewEmployees();
         break; 
-        case "Update employee department": updateEDepartment();
+        case "Update employee roles": updateRole();
         break;
-        case "Update employee roles": updateERoles();
-        break;
-        case "Update employee manager": updateEManager();
+        case "Update employee manager": updateManager();
         break;
         case "Exit": exit(0);
         default: return;
@@ -215,7 +212,7 @@ const addEmployeeQs = function (choiceArr, managerArr) {
                     }
                 )
             }else{
-                console.log(answer.manager.split(' ')[0])
+                // console.log(answer.manager.split(' ')[0])
                 connection.query(`SELECT id FROM employees WHERE first_name = '${answer.manager.split(' ')[0]}' AND last_name = '${answer.manager.split(' ')[1]}'`, (err, result2)=> {
                     if(err) throw err;
                     connection.query(
@@ -320,7 +317,7 @@ const viewEmployees = function () {
                 for(let i = 0; i < ret.length; i++){
                     for(let j = 0; j < ret.length; j++){
                         if(ret[i][6] === ret[j][0]){
-                            ret[i][6] = ret[j][1] + ret[j][2];
+                            ret[i][6] = ret[j][1] + " " +ret[j][2];
                         }
                     }
                 }
@@ -330,6 +327,98 @@ const viewEmployees = function () {
         })
     })
     menu();
+}
+
+const updateRole = function () {
+    var employeeArr = [];
+    connection.query("SELECT id, first_name, last_name FROM employees", (err, result) => {
+        if(err) throw err;
+        for(let i = 0; i < result.length; i++){
+            employeeArr.push(result[i].first_name + " " + result[i].last_name);
+        }
+        roleArrHelper(employeeArr);
+    })
+}
+
+const roleArrHelper = function(arr){
+    var roleArr = [];
+    connection.query("SELECT title FROM roles", (err, result) => {
+        if(err) throw err;
+        for(let i = 0; i < result.length; i++){
+            roleArr.push(result[i].title);
+        }
+        updateERole(arr, roleArr);
+    })
+}
+
+const updateERole = function (employeeArr, roleArr) {
+    const questions = [
+        {
+            type: "list",
+            name: "employee",
+            message: "Which employee should be updated?",
+            choices: employeeArr,
+        },
+        {
+            type: "list",
+            name: "role",
+            message: "Which role should employee be moved to?",
+            choices: roleArr,
+        }
+    ]
+    inquirer.prompt(questions).then((answers)=>{
+        connection.query(`SELECT id FROM roles WHERE title = '${answers.role}'`, (err, result) =>    {
+            if(err) throw err;
+            connection.query(`UPDATE employees SET role_id = ${result[0].id} WHERE first_name = '${answers.employee.split(' ')[0]}' AND last_name = '${answers.employee.split(' ')[1]}'`,
+            (err, result1)=>
+            {
+                if(err) throw err;
+                console.log("Successfully switched roles.");
+            })
+        })
+        menu();
+    })
+}
+
+const updateManager = function () {
+    const ret = [];
+    connection.query("SELECT * FROM employees", (err, results) => {
+        if(err) throw err;
+        for(let i = 0; i < results.length; i++){
+            ret.push(results[i].first_name + " " + results[i].last_name);
+        }
+        updateManagerHelper(ret);
+    });
+}
+
+const updateManagerHelper = function (arr) {
+    console.log(arr);
+    const questions = [
+        {
+            type: "list",
+            name: "employee",
+            message: "Which employee should be assigned a new manager?",
+            choices: arr,
+        },
+        {
+            type: "list",
+            name: "manager",
+            message: "Which employee will be the new manager?",
+            choices: arr,
+        }
+    ]
+    inquirer.prompt(questions).then((answer)=>{
+        connection.query(`SELECT id FROM employees WHERE first_name = '${answer.manager.split(" ")[0]}' AND last_name = '${answer.manager.split(" ")[1]}'`, 
+        (err, result)=>{
+            if(err) throw err;
+            connection.query(`UPDATE employees SET manager_id = ${result[0].id} WHERE first_name = '${answer.employee.split(' ')[0]}' AND last_name = '${answer.employee.split(' ')[1]}'`,
+            (err, result1) => {
+                if(err) throw err;
+                console.log("Manager updated successfully");
+                menu();
+            })
+        })
+    })
 }
 
 menu();
