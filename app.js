@@ -1,8 +1,10 @@
+//dependencies
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const cTable = require("console.table");
 const { exitCode, exit } = require("process");
 
+//Data for mysql connection
 const connection = mysql.createConnection({
     host: 'localhost',
     port: 3306,
@@ -12,16 +14,16 @@ const connection = mysql.createConnection({
     database: 'company',
   });
   
-  // Initiate MySQL Connection.
-  connection.connect((err) => {
+// Initiate MySQL Connection.
+connection.connect((err) => {
     if (err) {
-      console.error(`error connecting: ${err.stack}`);
-      return;
+        console.error(`error connecting: ${err.stack}`);
+        return;
     }
     console.log(`connected as id ${connection.threadId}`);
-  });
+});
 
-
+//array of menu items
 const mainMenu = [
     "Add department", 
     "Add role", 
@@ -34,6 +36,7 @@ const mainMenu = [
     "Exit"
 ];
 
+//menu prompt using inquirer
 const menu = function () {
     inquirer
         .prompt(
@@ -48,6 +51,7 @@ const menu = function () {
         });
 }
 
+//directs program to correct function
 const optionSwitch = function (option) {
     switch(option){
         case "Add department": addDepartment();
@@ -71,6 +75,7 @@ const optionSwitch = function (option) {
     }
 }
 
+//simple inquirer and sql add function
 const addDepartment = function () {
     inquirer
         .prompt(
@@ -92,6 +97,7 @@ const addDepartment = function () {
         });
 }
 
+//creates an array of departments to be chosen from in addRoleQs
 const addRole = function () {
     var temp = [];
     connection.query("SELECT name FROM departments", function (err, rows) {
@@ -103,6 +109,7 @@ const addRole = function () {
     });
 }
 
+//allows for a new role to be constructed and added to the roles table with inquirer
 const addRoleQs = function (choiceArr) {
     let questions = [
         {
@@ -143,6 +150,7 @@ const addRoleQs = function (choiceArr) {
     });
 }
 
+//creates an array of roles to be chosen from in addEmployeeQs
 const addEmployee = function () {
     var temp = [];
     connection.query("SELECT title FROM roles", function (err, rows) {
@@ -154,6 +162,7 @@ const addEmployee = function () {
     });
 }
 
+//creates an array of employees to be chosen from in addEmployeeQs
 const managerHelper = function (choiceArr){
     var temp = ["No Manager"];
     connection.query("SELECT * FROM employees", function (err, rows, fields) {
@@ -167,6 +176,7 @@ const managerHelper = function (choiceArr){
     });
 }
 
+//allows for a new employee to be added 
 const addEmployeeQs = function (choiceArr, managerArr) {
     let questions = [
         {
@@ -235,6 +245,7 @@ const addEmployeeQs = function (choiceArr, managerArr) {
     });
 }
 
+//uses console.table to show the results of a simple sql selection
 const viewDepartments = function () {
     let ret = [];
     connection.query("SELECT * FROM departments", (err, result) => {
@@ -248,6 +259,8 @@ const viewDepartments = function () {
     menu();
 }
 
+//uses console.table to show the results of a simple sql selection
+// then replaces id's with names of departments with for loops
 const viewRoles = function() {
     let ret = [];
     let deps = [];
@@ -274,6 +287,8 @@ const viewRoles = function() {
     menu();
 }
 
+//uses console.table to show the results of a simple sql selection
+// then replaces id's with names of departments, managers, salaries, and roles using loops
 const viewEmployees = function () {
     let ret = [];
     let roles = [];
@@ -329,6 +344,7 @@ const viewEmployees = function () {
     menu();
 }
 
+//creates an array of employees to be used in updateERole
 const updateRole = function () {
     var employeeArr = [];
     connection.query("SELECT id, first_name, last_name FROM employees", (err, result) => {
@@ -340,6 +356,7 @@ const updateRole = function () {
     })
 }
 
+//creates an array of roles to be used in updateERole
 const roleArrHelper = function(arr){
     var roleArr = [];
     connection.query("SELECT title FROM roles", (err, result) => {
@@ -351,6 +368,7 @@ const roleArrHelper = function(arr){
     })
 }
 
+//user selects employee to be updated then the role to update to.
 const updateERole = function (employeeArr, roleArr) {
     const questions = [
         {
@@ -380,6 +398,7 @@ const updateERole = function (employeeArr, roleArr) {
     })
 }
 
+//creates a list of employees used twice in updateManagerHelper
 const updateManager = function () {
     const ret = [];
     connection.query("SELECT * FROM employees", (err, results) => {
@@ -391,6 +410,7 @@ const updateManager = function () {
     });
 }
 
+//runs through a list of employees once to select the one to update, and the second time to choose the new manager
 const updateManagerHelper = function (arr) {
     console.log(arr);
     const questions = [
@@ -421,4 +441,5 @@ const updateManagerHelper = function (arr) {
     })
 }
 
+//call menu
 menu();
